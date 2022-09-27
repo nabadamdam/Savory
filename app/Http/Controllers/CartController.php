@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\CartItem;
-use App\Models\User;
+use App\Models\Korisnik;
+use App\Models\Links;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+use Stripe;
 
-class CartController extends Controller
+class CartController extends FrontController
 {
     public function add(Request $request)
     {
         $id = $request->id;
+        $quantity = $request->quantity;
         $cart = session()->get('cart');
         if (!$cart) {
             $cart = array();
@@ -22,26 +24,26 @@ class CartController extends Controller
             foreach ($cart as $value) {
                 if ($value['id'] == $id) {
                     $response['warning'] = true;
-                    $response['msg'] = __('Proizvod je već dodat u korpu');
+                    $response['msg'] = __('Product is already in cart');
                     return $response;
                 }
             }
         }
 
+        $product = \DB::table('proizvodi')->where('idProizvoda', $request->id)->first();
+
         $cart[] = [
-            "id" => $product->id,
-            "name" => $product->title,
-            "price" => $product->price,
-            "currency" => 'RSD',
-            "featured_image" => $colorDB->firstImage->picture,
-            "size" => $size,
-            "color" => $color,
-            "quantity" => $quantity
+            "id" => $product->idProizvoda,
+            "name" => $product->Naziv,
+            "price" => $product->Cena*$quantity,
+            "quantity" => $quantity,
+            "currency" => 'EUR',
+            "featured_image" => $product->SlikaSrc,
         ];
 
         session()->put('cart', $cart);
         $response['success'] = true;
-        $response['msg'] = __('Uspešno ste dodali proizvod u korpu');
+        $response['msg'] = __('Successfully added product to cart');
         return response()->json($response);
     }
 
@@ -55,74 +57,50 @@ class CartController extends Controller
             }
         }
 
-        toastr()->info('Uspešno ste obrisali proizvod iz korpe');
+        toastr()->info('Successfully removed product from cart');
         return redirect()->route('cart');
     }
 
 
     public function cart()
     {
-        $menCat = Category::find(3);
-        $womenCat = Category::find(2);
-        $kidCat = Category::find(4);
-        $accessCat = Category::find(5);
-        $funShCat = Category::find(30);
-
+        $subscriber = null;
         $cart = session()->get('cart');
 
         if (empty($cart)) {
-            toastr()->error('Korpa je prazna');
+            toastr()->error('Cart is empty');
             return redirect()->route('homepage');
+        }
+
+        if(session()->has('user')){
+            $subscriber = Korisnik::where('idKorisnika', session('user')[0]->idKorisnika)->first();
         }
 
         $final_price = 0;
         foreach ($cart as $item) {
-            $final_price += $item['price'] * $item['quantity'];
+            $final_price += $item['price'];
         }
 
-        return view('web.cart', compact('cart', 'final_price', 'menCat', 'womenCat', 'kidCat', 'accessCat', 'funShCat'));
+        $model = new Links();
+        $links = $model->getLinks();
+        $this->data['links'] = $links;
+
+        return view('pages.cart', compact('cart', 'final_price', 'links', 'subscriber'));
     }
-
-    public function checkout()
-    {
-        $menCat = Category::find(3);
-        $womenCat = Category::find(2);
-        $kidCat = Category::find(4);
-        $accessCat = Category::find(5);
-        $funShCat = Category::find(30);
-
-        if (Auth::user()) {
-            $user = User::findorfail(Auth::user()->id);
-        } else {
-            $user = null;
-        }
-
-        $cart = session()->get('cart');
-
-        if (empty($cart)) {
-            toastr()->error('Korpa je prazna');
-            return redirect()->route('homepage');
-        }
-
-        $final_price = 0;
-        foreach ($cart as $item) {
-            $final_price += $item['price'] * $item['quantity'];
-        }
-
-        return view('web.checkout', compact('cart', 'final_price', 'menCat', 'womenCat', 'kidCat', 'accessCat', 'funShCat', 'user'));
-    }
-
 
     public function payment(Request $request)
     {
         $cart = session()->get('cart');
-        $user = Auth::user();
-        if (!$user) {
-            toastr()->error('Morate biti ulogovani kako bi ste izvršili porudžbinu');
-            return redirect()->route('login');
+        $itemId = $cart[0]["id"];
+        /** #todo Proveri da li je korisnik ulogovan */
+
+        if(!session()->has('user')){
+            toastr()->error('You must be logged in to buy something');
+            return redirect()->route('homepage');
         }
+
         if (!$cart) {
-            toastr()->error('Korpa je prazna');
+            toastr()->error('Cart is empty');
             return redirect()->route('homepage');
         }
 
@@ -137,13 +115,9 @@ class CartController extends Controller
             'city' => 'required'
         ));
 
-        $db_subscriber = User::find($user->id);
-        $db_subscriber->phone_number = $request->phone_number;
-        $db_subscriber->city = $request->city;
-        $db_subscriber->address = $request->address;
-        $db_subscriber->postal_code = $request->postal_code;
-        $db_subscriber->country = $request->country;
-        $db_subscriber->save();
+        \DB::table('korisnici')
+            ->where("idKorisnika", session('user')[0]->idKorisnika)
+            ->update(['broj_telefona' => $request->phone_number, "grad" => $request->city, "adresa" => $request->address, "postanski_broj" => $request->postal_code, "drzava" => $request->country]);
 
         $now_time = Carbon::now();
 
@@ -156,19 +130,12 @@ class CartController extends Controller
         $cart_db->city = $request->city;
         $cart_db->postal_code = $request->postal_code;
         $cart_db->phone_number = $request->phone_number;
-        $cart_db->user_id = $user->id;
+        //$cart_db->user_id = $user->id;
         $cart_db->status = 'Započeto';
-        if ($request->payment_method == 'card_payment') {
-            $cart_db->payment_method = 'card_payment';
-        } elseif ($request->payment_method == 'payment_on_delivery') {
-            $cart_db->payment_method = 'payment_on_delivery';
-        } elseif ($request->payment_method == 'payment_slip') {
-            $cart_db->payment_method = 'payment_slip';
-        }
-
+        $cart_db->payment_method = 'stripe_payment';
         $price = 0;
         foreach ($cart as $val) {
-            $price += $val['price'] * $val['quantity'];
+            $price += $val['price'];
         }
         $cart_db->price = $price;
         $cart_db->started_at = $now_time;
@@ -177,56 +144,59 @@ class CartController extends Controller
                 $cart_items = new CartItem();
                 $cart_items->cart_id = $cart_db->id;
                 $cart_items->item_id = $val['id'];
-                $cart_items->price = $val['price'] * $val['quantity'];
-                $cart_items->color_id = $val['color'];
-                $cart_items->size = $val['size'];
                 $cart_items->quantity = $val['quantity'];
+                $cart_items->price = $val['price'];
                 $cart_items->save();
+
+                $product = \DB::table('proizvodi')
+                ->where('idProizvoda',$val['id'])
+                ->first();
+
+                $newQuantity = $product->Kolicina - $val['quantity'];
+        
+                \DB::table('proizvodi')
+                ->where("idProizvoda",  $val['id'])
+                ->update(['Kolicina' => $newQuantity]);
             }
 
             session()->forget('cart');
 
-            if ($request->payment_method == 'payment_on_delivery') {
-                echo self::successPaymentOnDelivery($cart_db, $cart);
-            } elseif ($request->payment_method == 'card_payment') {
-                return abort(404);
-            } elseif ($request->payment_method == 'payment_slip') {
-                echo self::successPaymentSlip($cart_db, $cart);
+
+            $total=$request->input('totall');
+            $total1=$total*100;
+            $total=(int)$total1;
+
+
+            $kon="idOrders: ".$cart_db->id;
+
+
+            // Set your secret key: remember to change this to your live secret key in production
+            // See your keys here: https://dashboard.stripe.com/account/apikeys
+
+            \Stripe\Stripe::setApiKey('sk_test_51KwV0xFYMD1HadiTJsLVMYx2sqiU7TWh4WWJV09WnAvCXaH7ljYMiZ7SJEaitDYATIsiMlQdEY5jdCKhAst9FTbC00bSU4Se1c');
+
+            // Token is created using Checkout or Elements!
+            // Get the payment token ID submitted by the form:
+            $token = $_POST['stripeToken'];
+
+            $charge = \Stripe\Charge::create([
+                'amount' => $total,
+                'currency' => 'usd',
+                'description' => $kon,
+                'source' => $token,
+            ]);
+        
+            if($charge->status == 'succeeded') {
+                $cart_db->status = 'Succeeded';
+                $cart_db->save();
+                toastr()->success('Successfully payment!');
+                return view("pages/home",$this->data);
+            } else {
+                toastr()->error('Something is wrong with the payment please try again!');
+                return view("pages/home",$this->data);
             }
+            
         }
-    }
-
-    public function successPaymentOnDelivery($cart_db, $cart)
-    {
-        $menCat = Category::find(3);
-        $womenCat = Category::find(2);
-        $kidCat = Category::find(4);
-        $accessCat = Category::find(5);
-        $funShCat = Category::find(30);
-
-        $cart_db->status = 'Uspešno';
-        $cart_db->finished_at = Carbon::now();
-        $cart_db->save();
-        /*Mail::to($cart_db->email)
-            ->send(new Invoice($cart_db));*/
-
-        $cart = $cart_db;
-        return view('web.cart_success', compact('cart', 'menCat', 'womenCat', 'kidCat', 'accessCat', 'funShCat'));
-    }
-
-    public function successPaymentSlip($cart_db, $cart)
-    {
-        $menCat = Category::find(3);
-        $womenCat = Category::find(2);
-        $kidCat = Category::find(4);
-        $accessCat = Category::find(5);
-        $funShCat = Category::find(30);
-
-        $cart_db->status = 'Na čekanju';
-        $cart_db->finished_at = Carbon::now();
-        $cart_db->save();
-        $cart = $cart_db;
-        return view('web.payment_slip', compact('cart', 'menCat', 'womenCat', 'kidCat', 'accessCat', 'funShCat'));
     }
 
 }

@@ -7,6 +7,8 @@ use App\Http\Controllers\FrontController;
 use Illuminate\Http\Request;
 use App\Models\Products;
 use App\Models\User;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Http\Requests\UpdateRequest;
 use App\Http\Requests\productRequest;
 
@@ -14,10 +16,14 @@ class AdminController extends FrontController
 {   
     protected $modelUser;
     protected $modelProduct;
+    protected $modelCart;
+    protected $modelCartItems;
     public function __construct(){
         parent::__construct();
         $this->modelUser = new User();
         $this->modelProduct = new Products();
+        $this->modelCart = new Cart();
+        $this->modelCartItems = new CartItem();
     }
     public function index(){
         try{
@@ -26,11 +32,13 @@ class AdminController extends FrontController
             $subscribes = $this->modelUser->getAllSub();
             $contacts = $this->modelUser->getAllContact();
             $activitys = $this->modelUser->getAllActivity();
+            $carts = $this->modelCart->getAllCarts();
             $this->data['products'] = $products;
             $this->data['users'] =$users;
             $this->data['subscribes'] = $subscribes;
             $this->data['contacts'] = $contacts;
             $this->data['activitys'] = $activitys;
+            $this->data['carts'] = $carts;
             return view("pages/admin/admin",$this->data);
         }catch(\Exception $ex){
             return \redirect("/")->with("message","Error with load admin page!");
@@ -103,6 +111,36 @@ class AdminController extends FrontController
             \Log::error($ex->getMessage());
         } 
     }
+    public function setDelivered($id){
+        try{
+            $updatedCart = $this->modelCart->updateCartDelivered($id);
+            if($updatedCart){
+                return \redirect("/admin")->with("message","Successfuly update cart!");
+            }
+            else{
+                return \redirect("/admin")->with("message","Unsuccessfuly update cart!");
+            }
+        }
+        catch(\Exception $ex){
+            return \redirect("/admin")->with("message","Error with edit product subscribe!");
+            \Log::error($ex->getMessage());
+        } 
+    }
+    public function seeDetails($id){
+        try{
+            $cartItems = $this->modelCartItems->getCartItemsOfCart($id);
+            $allProducts = $this->modelProduct->getProducts();
+            if($cartItems && $allProducts){
+                $this->data['cartItems'] = $cartItems;
+                $this->data['allProducts'] = $allProducts;
+                return view("pages/admin/seeDetailsOfCart",$this->data);
+            }
+        }
+        catch(\Exception $ex){
+            return \redirect("/admin")->with("message","Error with edit product subscribe!");
+            \Log::error($ex->getMessage());
+        } 
+    }
     public function getOneUser($id){
         try{
             $oneUser = $this->modelUser->getUserWithId($id);
@@ -152,6 +190,7 @@ class AdminController extends FrontController
             $desc = $request->input('desc');
             $price = $request->input('price');
             $id = $request->input('idProd');
+            $quantity = $request->input('quantity');
             
             if($request->hasFile('picsrc')) {
                 $file = $request->file('picsrc');
@@ -159,7 +198,7 @@ class AdminController extends FrontController
                 if($file->isValid()){
                     $file->move(public_path()."/images/", $imeFajla);
                     try{ 
-                        $this->modelProduct->updateProductWithPic($name,$imeFajla,$picalt,$desc,$price,$id);
+                        $this->modelProduct->updateProductWithPic($name,$imeFajla,$picalt,$desc,$price,$id,$quantity);
                         return \redirect("/admin")->with('messageProductUpdate','Product are successfuly updated!');
                     }
                     catch(\Exception $ex) {
@@ -172,7 +211,7 @@ class AdminController extends FrontController
                 }
             }else{
                 try{
-                    $this->modelProduct->updateProductWithOutPic($name,$picalt,$desc,$price,$id);
+                    $this->modelProduct->updateProductWithOutPic($name,$picalt,$desc,$price,$id,$quantity);
                     return \redirect("/admin")->with('messageProductUpdate','Product are successfuly updated!!!!!');
                 }
                 catch(\Exception $ex) {
@@ -189,6 +228,7 @@ class AdminController extends FrontController
             $picalt = $request->input('picAlt');
             $desc = $request->input('desc');
             $price = $request->input('price');
+            $quantity = $request->input('quantity');
 
             $file = $request->file('picsrc');
             $imeFajla = time().$file->getClientOriginalName();
@@ -196,7 +236,7 @@ class AdminController extends FrontController
             if($file->isValid()){
                 $file->move(public_path()."/images/", $imeFajla);
                 try{
-                    $idInsertProduct = $this->modelProduct->insertProduct($name,$imeFajla,$picalt,$desc,$price);
+                    $idInsertProduct = $this->modelProduct->insertProduct($name,$imeFajla,$picalt,$desc,$price,$quantity);
                     return \redirect("/admin")->with('messageProduct','Product are successfuly inserted!');
                 }
                 catch(\Exception $ex) {

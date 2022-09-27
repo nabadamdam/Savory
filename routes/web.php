@@ -38,6 +38,8 @@ Route::group(['prefix' => '/admin' , 'middleware' => 'adminLogIn'], function() {
     Route::get('/subscribe/delete/{id}',"Admin\AdminController@deleteSubscribeAjax");
     Route::get('/editProduct/{id}',"Admin\AdminController@getOneProduct");
     Route::get('/editUser/{id}',"Admin\AdminController@getOneUser");
+    Route::get('/setDelivered/{id}',"Admin\AdminController@setDelivered");
+    Route::get('/seeDetails/{id}',"Admin\AdminController@seeDetails");
     Route::any('/formUpdateUser',"Admin\AdminController@updateUser");
     Route::get('/dateFilter',"Admin\AdminController@activityDate");
     Route::any('/insertProduct',"Admin\AdminController@insertProduct");
@@ -45,16 +47,18 @@ Route::group(['prefix' => '/admin' , 'middleware' => 'adminLogIn'], function() {
 });
 
 Route::pattern('id', '[0-9]+');
-Route::get('/',"HomeController@index");
+Route::get('/',"HomeController@index")->name('homepage');
 Route::group(['middleware' => 'isLoggedIn' ], function() {
     Route::get('/logout',"UserController@logOut");
-    Route::get('/reservation',"ReservationController@index");
-    Route::any('/reservation/form',"ReservationController@formData");
+    Route::get('/oneProduct/{id}',"ProductsController@oneProduct");
+    Route::get('cart/add', [App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+    Route::get('cart/remove/{id}', [App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+    Route::get('cart', [App\Http\Controllers\CartController::class, 'cart'])->name('cart');
+    Route::post('payment', [App\Http\Controllers\CartController::class, 'payment'])->name('payment');
 });
 Route::any('/registration',"UserController@registration");
 Route::any('/home/subscribe',"UserController@subscribe");
 Route::get('/author',"AuthorController@index");
 Route::get('/services',"ServicesController@index");
 Route::post('/sendemail/send', 'ContactController@send');
-
-
+// Route::post('stripe', [App\Http\Controllers\CartController::class, 'stripe'])->name('stripe');

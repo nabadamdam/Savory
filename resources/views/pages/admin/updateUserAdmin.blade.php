@@ -2,7 +2,7 @@
 @section("mainContent")
 <div class="container"> 
     <h2 class="cursive-font primary-color regH">Update User</h2>
-    <form action="{{url('/admin/formUpdateUser')}}" method="POST" >
+    <form action="{{url('/admin/formUpdateUser')}}" method="POST" onSubmit="return proveraPodatakaUser();">
         <input type="hidden" name="_token" value="{{csrf_token()}}"/>
     @foreach($users as $user)
         <div class="row form-group">

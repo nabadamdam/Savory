@@ -7,7 +7,7 @@
 }
 /* =======================================================
 *
-* 	Template Style 
+* 	Template Style
 *
 * ======================================================= */
 body {
@@ -27,6 +27,21 @@ body {
   -webkit-transition: 0.5s;
   -o-transition: 0.5s;
   transition: 0.5s;
+}
+.greenButton{
+  color: #4cae4c;
+}
+.priceAndQuantity {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+.backToAdmin{
+    width: 30%;
+}
+#backToAdmin {
+  display: flex;
+  justify-content: space-around;
 }
 .offcanvas #page {
   overflow: hidden;
@@ -2085,4 +2100,15 @@ form label {
   border: 1px solid #d4d7dd!important;
   border-radius: 5px;
   padding: 5px;
+}
+
+#card-element{
+    box-shadow: none;
+    background: transparent;
+    border: 2px solid rgba(0, 0, 0, 0.1) !important;
+    height: 46px;
+    font-size: 16px;
+    font-weight: 300;
+    padding: 11px 11px 15px 15px;
+    border-radius: 4px;
 }

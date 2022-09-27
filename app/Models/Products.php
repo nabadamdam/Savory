@@ -9,7 +9,7 @@ class Products{
     }
     public function getProductsPaginate(){
         return \DB::table($this->table)
-                ->paginate(3); 
+                ->paginate(3);
     }
     public function deleteProdAjax($id){
         return \DB::table($this->table)
@@ -21,6 +21,11 @@ class Products{
                 ->where('idProizvoda',$id)
                 ->get();
     }
+    public function getOneProduct($id){
+        return \DB::table($this->table)
+                ->where('idProizvoda',$id)
+                ->first();
+    }
     public function getProductsSearchPaginate($value){
         return \DB::table($this->table)
                 ->where('Naziv','LIKE','%'.$value.'%')
@@ -28,22 +33,22 @@ class Products{
                 ->paginate(3)
                 ->setpath('');
     }
-    public function insertProduct($name,$imeFajla,$picalt,$desc,$price){
+    public function insertProduct($name,$imeFajla,$picalt,$desc,$price,$quantity){
         return \DB::table($this->table)
                 ->insertGetId(
-                    ["Naziv" => $name,"SlikaSrc" => 'images/'.$imeFajla,"SlikaAlt" => $picalt,"Opis" => $desc,"Cena" => $price,"idKategorije" => 2]
+                    ["Naziv" => $name,"SlikaSrc" => 'images/'.$imeFajla,"SlikaAlt" => $picalt,"Opis" => $desc,"Kolicina" => $quantity,"Cena" => $price,"idKategorije" => 2]
                 );
     }
-    public function updateProductWithOutPic($name,$picalt,$desc,$price,$id){
+    public function updateProductWithOutPic($name,$picalt,$desc,$price,$id,$quantity){
         return \DB::table($this->table)
                 ->where("idProizvoda",$id)
-                ->update(['Naziv' => $name,"SlikaAlt" => $picalt,"Opis" => $desc,"Cena" => $price]);
+                ->update(['Naziv' => $name,"SlikaAlt" => $picalt,"Opis" => $desc,"Kolicina" => $quantity,"Cena" => $price]);
 
     }
-    public function updateProductWithPic($name,$imeFajla,$picalt,$desc,$price,$id){
+    public function updateProductWithPic($name,$imeFajla,$picalt,$desc,$price,$id,$quantity){
         return \DB::table($this->table)
                 ->where("idProizvoda",$id)
-                ->update(['Naziv' => $name,"SlikaSrc" => 'images/'.$imeFajla,"SlikaAlt" => $picalt,"Opis" => $desc,"Cena" => $price]);
+                ->update(['Naziv' => $name,"SlikaSrc" => 'images/'.$imeFajla,"SlikaAlt" => $picalt,"Opis" => $desc,"Kolicina" => $quantity,"Cena" => $price]);
 
     }
 }

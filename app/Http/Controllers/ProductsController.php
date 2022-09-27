@@ -44,4 +44,17 @@ class ProductsController extends FrontController
         
         
     }
+    public function oneProduct($id){
+        try{
+            $oneProducts = $this->model->getOneProduct($id);
+            if(isset($oneProducts) > 0){
+                return view('pages/oneProduct')->with('oneProducts',$oneProducts)->with($this->data);
+            }
+        }
+        catch(\Exception $ex){
+            dd($ex);
+            return \redirect("/")->with("message","Error with getting the product!");
+            \Log::error($ex->getMessage());
+        } 
+    }
 }

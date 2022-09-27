@@ -51,23 +51,43 @@
 				<p>Be the first to know about the news in restaurant.</p>
 			</div>
 		</div>
-		<div class="row animate-box">
-			<div class="col-md-8 col-md-offset-2">
-				<form action="{{url('/home/subscribe')}}" method="POST" onSubmit="return proveraSubscribe();" class="form-inline">
-					<input type="hidden" name="_token" value="{{csrf_token()}}"/>
-					<div class="col-md-6 col-sm-6" id="marginLeft">
-						<div class="form-group">
-							<label for="email" class="sr-only">Email</label>
-							<input type="email" name="email" class="form-control" id="emailSub" placeholder="Your Email">
-							<span id="errorEmail3"></span>
+		@if(session()->has("user"))
+			<div class="row animate-box">
+				<div class="col-md-8 col-md-offset-2">
+					<form action="{{url('/home/subscribe')}}" method="POST" onSubmit="return proveraSubscribe();" class="form-inline">
+						<input type="hidden" name="_token" value="{{csrf_token()}}"/>
+						<div class="col-md-6 col-sm-6" id="marginLeft">
+							<div class="form-group">
+								<label for="email" class="sr-only">Email</label>
+								<input type="email" name="email" class="form-control" value="{{session('user')[0]->Email}}" id="emailSub" placeholder="Your Email"  readonly="readonly"/>
+								<span id="errorEmail3"></span>
+							</div>
 						</div>
-					</div>
-					<div class="col-md-6 col-sm-6">
-						<button type="submit" name="buttonSub" id="buttonSub" class="btn btn-default btn-block">Subscribe</button>
-					</div>
-				</form>
+						<div class="col-md-6 col-sm-6">
+							<button type="submit" name="buttonSub" id="buttonSub" class="btn btn-default btn-block">Subscribe</button>
+						</div>
+					</form>
+				</div>
 			</div>
-		</div>
+		@else
+			<div class="row animate-box">
+				<div class="col-md-8 col-md-offset-2">
+					<form action="{{url('/home/subscribe')}}" method="POST" onSubmit="return proveraSubscribe();" class="form-inline">
+						<input type="hidden" name="_token" value="{{csrf_token()}}"/>
+						<div class="col-md-6 col-sm-6" id="marginLeft">
+							<div class="form-group">
+								<label for="email" class="sr-only">Email</label>
+								<input type="email" name="email" class="form-control" id="emailSub" placeholder="Your Email">
+								<span id="errorEmail3"></span>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-6">
+							<button type="submit" name="buttonSub" id="buttonSub" class="btn btn-default btn-block">Subscribe</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		@endif
 	</div>
 </div>
 @endsection
@@ -87,12 +107,12 @@
 			<div class="tab-content">
 				<div class="tab-content-inner active" id="formLogIn" data-content="signup">
 					<h3 class="cursive-font">Log in</h3>
-					<form action="{{url('/login')}}" method="POST"">
+					<form action="{{url('/login')}}" method="POST" onSubmit="return proveraPodatakaLogIn();">
 						<input type="hidden" name="_token" value="{{csrf_token()}}"/>
 						<div class="row form-group">
 							<div class="col-md-12">
 								<label for="date-start">Email</label>
-								<input type="text" name="email" id="email" class="form-control"/>
+								<input type="email" name="email" id="email" class="form-control"/>
 								<span id="errorEmail2"></span>
 							</div>
 						</div>
@@ -110,7 +130,6 @@
 							</div>
 						</div>
 					</form>	
-					<a href="#" id="showResetP">Reset password!<a/></br></br>
 					@if(session()->has('message'))
 						{{ session('message') }}
 					@endif

@@ -27,7 +27,11 @@ class UserController extends Controller
                 $operation = "Login user";
                 $this->model->insertActivity($email,$operation);
                 $request->session()->put("user",$login);
-                return \redirect("/")->with("message","You are loggined successfuly!");
+                if($login[0]->idUloga == 1){
+                    return \redirect("/admin")->with("message","You are loggined successfuly!");
+                }else{
+                    return \redirect("/")->with("message","You are loggined successfuly!");
+                }
             }else{
                 return \redirect("/")->with("message","Loggin is fail!Try again!");
             }
@@ -35,7 +39,7 @@ class UserController extends Controller
         catch(\Exception $ex){
             return \redirect("/")->with("message","Error with login user!");
             \Log::error($ex->getMessage());
-        } 
+        }
     }
     public function logOut(Request $request){
         try{
@@ -51,7 +55,7 @@ class UserController extends Controller
         catch(\Exception $ex){
             return \redirect("/")->with("message","Error with logout user!");
             \Log::error($ex->getMessage());
-        } 
+        }
     }
     public function registration(RegistrationRequest $request){
         try{
@@ -75,7 +79,7 @@ class UserController extends Controller
         catch(\Exception $ex){
             return \redirect("/")->with("message","Error with registration user!");
             \Log::error($ex->getMessage());
-        } 
+        }
     }
     public function subscribe(SubscribeRequest $request){
         try{
@@ -87,6 +91,27 @@ class UserController extends Controller
                 $operation = "Subscribe user";
                 $this->model->insertActivity($email,$operation);
                 $idUserInsertSub = $this->model->insertSub($email);
+
+                $myEmailText="Novi pretplatnik: Mejl: ".$email.". Ovog pretplatnika kao i sve ostale mozete pogledati u admin panelu!" ;
+
+                $myEmail="nikola.riorovic98@gmail.com";
+    
+                try {
+                    $data = [
+                        'subject' => "Nova poruka!",
+                        'email' => $myEmail,
+                        'content' => $myEmailText
+                    ];
+    
+                    Mail::send('pages.email-template', $data, function($message) use ($data){
+                        $message->to($data['email'])
+                        ->subject($data['subject']);
+                    });
+    
+                } catch (\Exception $e) {
+                    return \redirect("/contact")->with("messageContact",$e->getMessage());
+                    \Log::error($e->getMessage());
+                }
                 if($idUserInsertSub){
                     return \redirect("/")->with("message","You are successfuly subscribed!");
                 }
@@ -95,7 +120,7 @@ class UserController extends Controller
         catch(\Exception $ex){
             return \redirect("/")->with("message","Error with subscribe user!");
             \Log::error($ex->getMessage());
-        } 
+        }
     }
     public function contact(ContactRequest $request){
         try{
@@ -106,27 +131,26 @@ class UserController extends Controller
             $this->model->insertActivity($email,$operation);
             $idContactUser = $this->model->insertContact($name,$email,$message);
 
-            $mail = new PHPMailer(true);
+            $myEmailText="Stigla Vam je nova poruka od: ".$name. ", Mejl: ".$email.", Poruka: ".$message." Kako bi odgovorili na ovu poruku potrebno je otici u Admin panel." ;
 
-                try {
-                    $mail->SMTPDebug = 0;
-                    $mail->isSMTP();
-                    $mail->Host = 'smtp.gmail.com';
-                    $mail->SMTPAuth = true;
-                    $mail->Username = 'nikola.riorovic98@gmail.com';
-                    $mail->Password = 'kolonija98';
-                    $mail->SMTPSecure = 'tls';
-                    $mail->Port = 587;
-                    $mail->setFrom('nikola.riorovic98@gmail.com', 'User contact from the site!');
-                    $mail->addAddress("nikolariorovic@hotmail.com");
-                    $mail->isHTML(true);
-                    $mail->Subject = 'Contact user';
-                    $mail->Body = $message;
-                    $mail->send();
-                } catch (\Exception $e) {
-                    return \redirect("/contact")->with("messageContact","Error with send email");
-                    \Log::error($ex->getMessage());
-                }
+            $myEmail="nikola.riorovic98@gmail.com";
+
+            try {
+                $data = [
+                    'subject' => "Nova poruka!",
+                    'email' => $myEmail,
+                    'content' => $myEmailText
+                ];
+
+                Mail::send('pages.email-template', $data, function($message) use ($data){
+                    $message->to($data['email'])
+                    ->subject($data['subject']);
+                });
+
+            } catch (\Exception $e) {
+                return \redirect("/contact")->with("messageContact",$e->getMessage());
+                \Log::error($e->getMessage());
+            }
 
             if($idContactUser){
                 return \redirect("/contact")->with("messageContact","Your message was successfully sent on administrator mail!");
@@ -135,7 +159,7 @@ class UserController extends Controller
         catch(\Exception $ex){
             return \redirect("/")->with("messageContact","Error with contact user!");
             \Log::error($ex->getMessage());
-        } 
+        }
      }
     public function usernameCheck($valueUsername){
         try{
@@ -149,7 +173,7 @@ class UserController extends Controller
         catch(\Exception $ex){
             return \redirect("/")->with("message","Error with username check!");
             \Log::error($ex->getMessage());
-        } 
+        }
     }
     public function resetPassword(){
         try{
@@ -168,6 +192,6 @@ class UserController extends Controller
         catch(\Exception $ex){
             return \redirect("/")->with("message","Error with reset password!");
             \Log::error($ex->getMessage());
-        } 
+        }
     }
 }

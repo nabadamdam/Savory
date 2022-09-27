@@ -12,7 +12,7 @@ class HomeController extends FrontController
         }
         catch(\Exception $ex){
             \Log::error($ex->getMessage());
-        } 
+        }
     }
-  
+
 }

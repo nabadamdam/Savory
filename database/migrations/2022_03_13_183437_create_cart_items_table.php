@@ -17,9 +17,6 @@ class CreateCartItemsTable extends Migration
             $table->id();
             $table->integer('cart_id')->nullable();
             $table->integer('item_id')->nullable();
-            $table->integer('color_id')->nullable();
-            $table->string('size')->nullable();
-            $table->integer('quantity')->nullable()->default(1);
             $table->double('price', 8, 2)->nullable();
             $table->timestamps();
         });

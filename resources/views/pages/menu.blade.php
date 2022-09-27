@@ -27,7 +27,7 @@
 			<div class="row" id="productSearch">
 				@foreach($products as $product)
 					<div class="col-lg-4 col-md-4 col-sm-6">
-						<a href="{{ $product->idProizvoda }}" class="fh5co-card-item">
+						<a href="{{ url("/oneProduct/$product->idProizvoda") }}" class="fh5co-card-item">
 							<figure>
 								<img src="{{asset(''.$product->SlikaSrc)}}" alt="{{ $product->SlikaAlt }}" class="img-responsive">
 							</figure>
@@ -39,7 +39,7 @@
 						</a>
 					</div>
 				@endforeach
-				
+
 			</div>
 			{{$products->links()}}
 		</div>
@@ -47,7 +47,7 @@
 @endsection
 @section('headerContent')
 <div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
-	<h1 class="cursive-font">Taste all our menu!</h1>	
+	<h1 class="cursive-font">Taste all our menu!</h1>
 </div>
 @endsection
 
@@ -57,3 +57,11 @@ sm
 @section('headerPicture')
 url({{asset('images/img_bg_1.jpg')}}
 @endsection
+<style>
+	.pagination {
+    	max-width: 100%!important;
+		display: flex!important;
+    	justify-content: center;
+	}
+
+</style>

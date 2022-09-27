@@ -62,9 +62,38 @@
         </tbody>
     </table>
 </div>
+<div class="container table-responsive table1A">   
+    <h2 class="cursive-font primary-color regH">All Carts</h2>  
+    <table class="table">
+        <thead>
+        <tr>
+            <th class="colorFont">Email</th>
+            <th class="colorFont">Total price</th>
+            <th class="colorFont">Payment method</th>
+            <th class="colorFont">Status</th>
+        </tr>
+        </thead>
+        <tbody id="tableUser">
+            @foreach($carts as $cart)
+                <tr>     
+                    <td>{{$cart->email}}</td>
+                    <td>{{$cart->price}}</td>
+                    <td>{{$cart->payment_method}}</td>
+                    <td>{{$cart->status}}</td>
+                    <td><a href="{{url('/admin/seeDetails/'.$cart->id)}}" class="btn btn-light">See details</a></td>
+                    @if($cart->status == 'Succeeded')
+                        <td><a href="{{url('/admin/setDelivered/'.$cart->id)}}" class="btn btn-light greenButton">Delivered</a></td>
+                    @else
+                        <td></td>
+                    @endif
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 <div class="container"> 
     <h2 class="cursive-font primary-color regH">Insert Products</h2>
-    <form action="{{url('/admin/insertProduct')}}" method="POST" enctype="multipart/form-data" >
+    <form action="{{url('/admin/insertProduct')}}" method="POST" enctype="multipart/form-data" onSubmit="return proveraPodatakaProduct();">
     <input type="hidden" name="_token" value="{{csrf_token()}}"/>
         <div class="row form-group">
             <div class="col-md-12">
@@ -92,6 +121,13 @@
                 <label for="date-start">Description</label>
                 <input type="text" name="desc" id="desc" class="form-control"/>
                 <span id="errorDescProd"></span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-12">
+                <label for="date-start">Quantity</label>
+                <input type="number" name="quantity" id="quantity" class="form-control"/>
+                <span id="errorQuantity"></span>
             </div>
         </div>
         <div class="row form-group">

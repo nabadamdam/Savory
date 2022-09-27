@@ -2,20 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CartItem extends Model
 {
-    use HasFactory;
+    protected $table = 'cart_items';
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'item_id', 'id');
-    }
-
-    public function color()
-    {
-        return $this->belongsTo(Color::class, 'color_id', 'id');
+    public function getCartItemsOfCart($id){
+        return \DB::table($this->table)
+                ->where('cart_id',$id)
+                ->get();
     }
 }

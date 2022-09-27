@@ -455,7 +455,7 @@ function proveraPodatakaContact(){
         document.getElementById("name").style.border ="1px solid green";
         document.getElementById("errorName1").innerHTML= "";
     }
-    if(!reMessage.test(message)){
+    if(!reMessage.test(message) || message == ""){
         greske.push(message);
         document.getElementById("message").style.border ="1px solid red";
         document.getElementById("errorMessage").innerHTML ="You didn't enter a message well! </br></br>";
@@ -516,6 +516,7 @@ function proveraPodatakaProduct(){
     var picAlt = document.getElementById("picAlt").value;
     var desc = document.getElementById("desc").value;
     var price = document.getElementById("price").value;
+    var quantity = document.getElementById("quantity").value;
     var greske = [];
     if(ime==""){
         greske.push(ime);
@@ -525,6 +526,16 @@ function proveraPodatakaProduct(){
     }else{
         document.getElementById("nameProd").style.border ="1px solid green";
         document.getElementById("errorNameProd").innerHTML= "";
+    }
+
+    if(quantity==""){
+        greske.push(quantity);
+        document.getElementById("quantity").style.border ="1px solid red";
+        document.getElementById("errorQuantity").innerHTML ="This field can't be empty!</br></br>";
+        document.getElementById("errorQuantity").style.color = "red";
+    }else{
+        document.getElementById("quantity").style.border ="1px solid green";
+        document.getElementById("errorQuantity").innerHTML= "";
     }
     
     if(picAlt==""){
@@ -569,6 +580,69 @@ function proveraPodatakaProduct(){
         return false;
     }
 }
+
+function proveraPodatakaProductUpdate(){
+    var ime = document.getElementById("nameProd").value;
+    var picSrc = document.getElementById("picsrc");
+    var picAlt = document.getElementById("picAlt").value;
+    var desc = document.getElementById("desc").value;
+    var price = document.getElementById("price").value;
+    var quantity = document.getElementById("quantity").value;
+    var greske = [];
+    if(ime==""){
+        greske.push(ime);
+        document.getElementById("nameProd").style.border ="1px solid red";
+        document.getElementById("errorNameProd").innerHTML ="This field can't be empty!</br></br>";
+        document.getElementById("errorNameProd").style.color = "red";
+    }else{
+        document.getElementById("nameProd").style.border ="1px solid green";
+        document.getElementById("errorNameProd").innerHTML= "";
+    }
+
+    if(quantity==""){
+        greske.push(quantity);
+        document.getElementById("quantity").style.border ="1px solid red";
+        document.getElementById("errorQuantity").innerHTML ="This field can't be empty!</br></br>";
+        document.getElementById("errorQuantity").style.color = "red";
+    }else{
+        document.getElementById("quantity").style.border ="1px solid green";
+        document.getElementById("errorQuantity").innerHTML= "";
+    }
+    
+    if(picAlt==""){
+        greske.push(picAlt);
+        document.getElementById("picAlt").style.border ="1px solid red";
+        document.getElementById("errorAltProd").innerHTML ="This field can't be empty!</br></br>";
+        document.getElementById("errorAltProd").style.color = "red";
+    }else{
+        document.getElementById("picAlt").style.border ="1px solid green";
+        document.getElementById("errorAltProd").innerHTML= "";
+    }
+    if(desc==""){
+        greske.push(desc);
+        document.getElementById("desc").style.border ="1px solid red";
+        document.getElementById("errorDescProd").innerHTML ="This field can't be empty!</br></br>";
+        document.getElementById("errorDescProd").style.color = "red";
+    }else{
+        document.getElementById("desc").style.border ="1px solid green";
+        document.getElementById("errorDescProd").innerHTML= "";
+    }
+    if(price==""){
+        greske.push(price);
+        document.getElementById("price").style.border ="1px solid red";
+        document.getElementById("errorPriceProd").innerHTML ="This field can't be empty!</br></br>";
+        document.getElementById("errorPriceProd").style.color = "red";
+    }else{
+        document.getElementById("price").style.border ="1px solid green";
+        document.getElementById("errorPriceProd").innerHTML= "";
+    }
+    if(greske.length == 0){
+        return true;
+    }else{
+        return false;
+    }
+}
+
 function proveraPodatakaUser(){
     var ime = document.getElementById("idName").value;
     var prezime = document.getElementById("idSur").value;

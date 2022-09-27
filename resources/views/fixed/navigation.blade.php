@@ -1,4 +1,4 @@
-<nav class="gtco-nav" role="navigation">
+<nav class="gtco-nav" id="darkCartNavigation" role="navigation">
 	<div class="gtco-container">
 		<div class="row">
 			<div class="col-sm-4 col-xs-12">
@@ -9,9 +9,9 @@
 					@foreach($links as $link)
 						@if(session()->has("user"))
 							@if(session('user')[0]->idUloga == 1)
-								@if($link->naziv == "Contact&Registration")
+								@if($link->naziv == "Contact&Registration" || $link->naziv == "Contact" || $link->naziv == "Cart" || $link->naziv == "Author" || $link->naziv == "Services")
 									@continue
-								@else	
+								@else
 									<li><a href="{{ url("$link->href") }}">{{$link->naziv}}</a></li>
 								@endif
 							@endif
@@ -24,14 +24,14 @@
 							@endif
 						@endif
 						@if(!session()->has("user"))
-							@if($link->naziv == "Admin" || $link->naziv == "Logout" || $link->naziv == "Contact" || $link->naziv == "Menu" || $link->naziv == "Reservations")
+							@if($link->naziv == "Admin" || $link->naziv == "Logout" || $link->naziv == "Contact" || $link->naziv == "Cart" || $link->naziv == "Menu")
 								@continue
 							@else
-								<li><a href="{{ url("$link->href") }}">{{$link->naziv}}</a></li>	
+								<li><a href="{{ url("$link->href") }}">{{$link->naziv}}</a></li>
 							@endif
-						@endif	
+						@endif
 					@endforeach
-				</ul>	
+				</ul>
 			</div>
 		</div>
 	</div>

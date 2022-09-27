@@ -48,10 +48,9 @@
 						<div class="gtco-contact-info">
 							<h3 class="cursive-font primary-color">Contact Information</h3>
 							<ul>
-								<li class="address">198 West 21th Street, <br> Suite 721 New York NY 10016</li>
-								<li class="phone"><a href="tel://1234567920">+ 1235 2355 98</a></li>
-								<li class="email"><a href="mailto:info@yoursite.com">info@yoursite.com</a></li>
-								<li class="url"><a href="http://FreeHTML5.co">FreeHTML5.co</a></li>
+								<li class="address">Djure Djakovica 13, <br> Smederevska Palanka 11421</li>
+								<li class="phone"><a href="tel://1234567920">+381 65 201 12 46</a></li>
+								<li class="email"><a href="mailto:info@yoursite.com">nikola.riorovic98@gmail.com</a></li>
 							</ul>
 						</div>
 					</div>
@@ -67,7 +66,7 @@
 				<div class="col-md-12">
 					<div class="col-md-6 animate-box">
 					<h3 class="cursive-font primary-color">Contact Us</h3>
-					<form action="{{url('/contact')}}" method="POST">
+					<form action="{{url('/contact')}}" method="POST" onSubmit="return proveraPodatakaContact();">
 						<input type="hidden" name="_token" value="{{csrf_token()}}"/>
 						<div class="row form-group">
 							<div class="col-md-12">
@@ -121,7 +120,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<h3 class="cursive-font primary-color regH">Registration</h3>
-					<form action="{{url('/registration')}}" method="POST" >
+					<form action="{{url('/registration')}}" method="POST" onSubmit="return proveraPodataka();">
 						<input type="hidden" name="_token" value="{{csrf_token()}}"/>
 						<div class="row form-group">
 							<div class="col-md-12">
@@ -140,7 +139,7 @@
 						<div class="row form-group">
 							<div class="col-md-12">
 								<label for="date-start">Email</label>
-								<input type="text" id="Email" name="Email" class="form-control"/>
+								<input type="email" id="Email" name="Email" class="form-control"/>
 								<span id="errorEmail"></span>
 							</div>
 						</div>
@@ -165,6 +164,12 @@
 						</div>
 					</form>	
 				</div>
+				@if(session()->has('message'))
+					{{ session('message') }}
+				@endif
+				@if(session()->has('messageMiddleware'))
+					{{ session('messageMiddleware') }}
+				@endif
 			</div>
 		</div>
 	</div>						
